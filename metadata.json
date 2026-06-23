@@ -1,0 +1,6 @@
+{
+  "name": "Voucher Generator",
+  "description": "A professional voucher generation application for Sonali Paper and Stationery with local drafting, printing, and high-quality PDF generation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
