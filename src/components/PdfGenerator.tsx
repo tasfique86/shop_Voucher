@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
-import { FileText, Loader2 } from 'lucide-react';
+import React, { useState } from "react";
+import html2canvas from "html2canvas-pro";
+import { jsPDF } from "jspdf";
+import { FileText, Loader2 } from "lucide-react";
 
 interface PdfGeneratorProps {
   elementId: string;
   voucherNumber: string;
+  customerName?: string;
 }
 
-export default function PdfGenerator({ elementId, voucherNumber }: PdfGeneratorProps) {
+export default function PdfGenerator({
+  elementId,
+  voucherNumber,
+  customerName,
+}: PdfGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generatePdf = async () => {
@@ -27,17 +32,17 @@ export default function PdfGenerator({ elementId, voucherNumber }: PdfGeneratorP
         scale: 2.5, // High resolution crisp text rendering
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: "#ffffff",
         logging: false,
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
-      
+      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+
       // 3. Setup standard A4 size in jsPDF
       const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
       });
 
       const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
@@ -52,7 +57,7 @@ export default function PdfGenerator({ elementId, voucherNumber }: PdfGeneratorP
       let height = width / ratio;
 
       // If height exceeds A4 height, scale down further
-      if (height > (pdfHeight - 20)) {
+      if (height > pdfHeight - 20) {
         height = pdfHeight - 20;
         width = height * ratio;
       }
@@ -61,14 +66,59 @@ export default function PdfGenerator({ elementId, voucherNumber }: PdfGeneratorP
       const xOffset = (pdfWidth - width) / 2;
       const yOffset = (pdfHeight - height) / 2;
 
-      pdf.addImage(imgData, 'JPEG', xOffset, yOffset, width, height, undefined, 'FAST');
-      
+      pdf.addImage(
+        imgData,
+        "JPEG",
+        xOffset,
+        yOffset,
+        width,
+        height,
+        undefined,
+        "FAST",
+      );
+
       // Save PDF with correct file name format
-      const fileName = `Voucher-${voucherNumber || 'Draft'}.pdf`;
-      pdf.save(fileName);
+      let finalCustomerName = customerName?.trim();
+
+      if (!finalCustomerName) {
+        alert("Please enter customer name");
+        const enteredName = prompt("Please enter customer name:");
+        if (enteredName !== null && enteredName.trim() !== "") {
+          finalCustomerName = enteredName.trim();
+        } else {
+          // User denied or left blank -> use HH-MM-SS time format
+          const now = new Date();
+          const pad = (n: number) => String(n).padStart(2, "0");
+          finalCustomerName = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+        }
+      }
+
+      // Format filename using (voucher no + customer name) and sanitize it
+      const sanitizedCustomerName = finalCustomerName.replace(
+        /[/\\?%*:|"<>]/g,
+        "-",
+      );
+      const fileName = `${voucherNumber || "Draft"}_${sanitizedCustomerName}.pdf`;
+
+      if (window.electronAPI) {
+        const arrayBuffer = pdf.output("arraybuffer");
+        const result = await window.electronAPI.savePdf(arrayBuffer, fileName);
+        if (!result.success) {
+          if (result.canceled) {
+            // User canceled the save dialog, exit gracefully
+            return;
+          }
+          throw new Error(result.error || "Failed to save PDF via Electron");
+        }
+      } else {
+        pdf.save(fileName);
+      }
     } catch (error) {
-      console.error('Failed to generate PDF:', error);
-      alert('Failed to generate PDF. Please try again or use the browser print option.');
+      console.error("Failed to generate PDF:", error);
+      const errMsg = error instanceof Error ? error.message : String(error);
+      alert(
+        `Failed to generate PDF: ${errMsg}. Please try again or use the browser print option.`,
+      );
     } finally {
       setIsGenerating(false);
     }

@@ -1,5 +1,6 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -21,6 +22,26 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  // Handle PDF saving from renderer
+  ipcMain.handle('save-pdf', async (event, arrayBuffer, fileName) => {
+    try {
+      const { filePath } = await dialog.showSaveDialog({
+        defaultPath: fileName,
+        filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
+      });
+
+      if (filePath) {
+        const buffer = Buffer.from(arrayBuffer);
+        await fs.promises.writeFile(filePath, buffer);
+        return { success: true };
+      }
+      return { success: false, canceled: true };
+    } catch (error) {
+      console.error('Error saving PDF:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
   createWindow();
 
   app.on('activate', () => {

@@ -18,3 +18,12 @@ export interface VoucherData {
   inWordsBengali: string;
   inWordsEnglish: string;
 }
+
+declare global {
+  interface Window {
+    electronAPI?: {
+      savePdf: (arrayBuffer: ArrayBuffer, fileName: string) => Promise<{ success: boolean; canceled?: boolean; error?: string }>;
+      isElectron: boolean;
+    };
+  }
+}
