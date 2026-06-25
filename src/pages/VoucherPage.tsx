@@ -369,6 +369,23 @@ export default function VoucherPage() {
     );
   };
 
+  const handleBeforePdfGenerate = (): boolean => {
+    const isValid = validateForm();
+    if (!isValid) {
+      alert(
+        "দয়া করে ভুলের স্থানগুলো সংশোধন করুন। (Please correct form validation errors before generating PDF)",
+      );
+    }
+    return isValid;
+  };
+
+  const handlePdfSuccess = () => {
+    finalizeVoucherAndIncrement();
+    alert(
+      "পিডিএফ সফলভাবে তৈরি হয়েছে এবং নতুন ভাউচার নম্বর বরাদ্দ করা হয়েছে! (PDF saved and new voucher loaded!)",
+    );
+  };
+
   // Keyboard friendly quick print
   const handlePrint = () => {
     if (!validateForm()) {
@@ -673,7 +690,7 @@ export default function VoucherPage() {
                     type="text"
                     value={voucher.customerName}
                     onChange={handleCustomerNameChange}
-                    placeholder="উদা: আব্দুল করিম (e.g. Abdul Karim)"
+                    placeholder="Enter Customer Name"
                     className={`w-full bg-slate-50 border ${errors.customerName ? "border-red-500 focus:border-red-500" : "border-slate-200 focus:bg-white focus:border-indigo-500"} focus:ring-1 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-800 transition-all`}
                   />
                   {errors.customerName && (
@@ -692,7 +709,7 @@ export default function VoucherPage() {
                     type="text"
                     value={voucher.customerAddress}
                     onChange={handleCustomerAddressChange}
-                    placeholder="উদা: লালদীঘি, কক্সবাজার"
+                    placeholder="Enter Customer Address"
                     className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-800 transition-all"
                   />
                 </div>
@@ -950,6 +967,8 @@ export default function VoucherPage() {
                 voucherNumber={voucher.voucherNumber}
                 customerName={voucher.customerName}
                 paperSize={paperSize}
+                onBeforeGenerate={handleBeforePdfGenerate}
+                onSuccess={handlePdfSuccess}
               />
 
               {/* Print Button */}

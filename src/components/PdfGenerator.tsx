@@ -8,6 +8,8 @@ interface PdfGeneratorProps {
   voucherNumber: string;
   customerName?: string;
   paperSize?: "a4" | "a5";
+  onBeforeGenerate?: () => boolean;
+  onSuccess?: () => void;
 }
 
 export default function PdfGenerator({
@@ -15,10 +17,16 @@ export default function PdfGenerator({
   voucherNumber,
   customerName,
   paperSize = "a4",
+  onBeforeGenerate,
+  onSuccess,
 }: PdfGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generatePdf = async () => {
+    if (onBeforeGenerate && !onBeforeGenerate()) {
+      return;
+    }
+
     const element = document.getElementById(elementId);
     if (!element) {
       alert("Error: Voucher preview element not found!");
@@ -114,6 +122,10 @@ export default function PdfGenerator({
         }
       } else {
         pdf.save(fileName);
+      }
+
+      if (onSuccess) {
+        onSuccess();
       }
     } catch (error) {
       console.error("Failed to generate PDF:", error);

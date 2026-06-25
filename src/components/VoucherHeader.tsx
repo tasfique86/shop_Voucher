@@ -37,7 +37,7 @@ export default function VoucherHeader({
 
       {/* Main Header Row */}
       <div className="text-left">
-        <h1 className="text-2xl md:text-3xl font-extrabold text-black tracking-tight mb-1 font-sans">
+        <h1 className="text-3xl font-extrabold text-black tracking-tight mb-1 font-sans">
           সোনালী পেপার এন্ড স্টেশনারী
         </h1>
         <p className="text-xs  font-bold text-black max-w-3xl mx-auto leading-relaxed text-center">

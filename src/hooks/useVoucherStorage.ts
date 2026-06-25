@@ -9,6 +9,21 @@ const INITIAL_PRODUCTS: ProductRow[] = [
   { id: '1', serialNo: 1, description: '', quantity: 0, rate: 0, amount: 0 }
 ];
 
+const getNextUnusedNumber = (list: VoucherData[]) => {
+  const lastNumStr = localStorage.getItem(LAST_VOUCHER_NUM_KEY) || '0';
+  let maxNum = parseInt(lastNumStr, 10);
+  list.forEach(v => {
+    const match = v.voucherNumber.match(/V-(\d+)/);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (num > maxNum) {
+        maxNum = num;
+      }
+    }
+  });
+  return maxNum + 1;
+};
+
 export function useVoucherStorage() {
   const [voucher, setVoucher] = useState<VoucherData>(() => {
     // 1. Try to load draft first
@@ -54,6 +69,8 @@ export function useVoucherStorage() {
     }
   });
 
+  const [loadedVoucherNumber, setLoadedVoucherNumber] = useState<string | null>(null);
+
   // Save draft whenever voucher state changes
   useEffect(() => {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(voucher));
@@ -67,7 +84,7 @@ export function useVoucherStorage() {
   const updateVoucher = (updater: Partial<VoucherData> | ((prev: VoucherData) => VoucherData)) => {
     setVoucher((prev) => {
       const updated = typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
-      
+
       // Calculate individual product row amounts and overall grand total
       const products = updated.products.map((p, idx) => {
         const qty = Math.max(0, p.quantity);
@@ -91,10 +108,10 @@ export function useVoucherStorage() {
     });
   };
 
+
   const getNextVoucherNumberStr = (offset = 1) => {
-    const lastNumStr = localStorage.getItem(LAST_VOUCHER_NUM_KEY) || '0';
-    const nextNum = parseInt(lastNumStr, 10) + offset;
-    return `V-${String(nextNum).padStart(4, '0')}`;
+    const nextNum = getNextUnusedNumber(savedVouchers);
+    return `V-${String(nextNum + offset - 1).padStart(4, '0')}`;
   };
 
   // Call this when the voucher is finalized/saved
@@ -103,26 +120,41 @@ export function useVoucherStorage() {
     const match = currentNumStr.match(/V-(\d+)/);
     const num = match ? parseInt(match[1], 10) : 1;
 
-    // Save to the finalized vouchers list
+    // Save/delete from the finalized vouchers list
     setSavedVouchers((prev) => {
-      // Avoid duplicate saves for the same voucher number by overwriting or adding
-      const existingIdx = prev.findIndex(v => v.voucherNumber === currentNumStr);
+      let newList = [...prev];
+      if (loadedVoucherNumber) {
+        // If it was loaded from history, delete it on save/print
+        newList = newList.filter(v => v.voucherNumber !== loadedVoucherNumber);
+        return newList;
+      }
+      
+      // If it was a new voucher, add it to history
+      const existingIdx = newList.findIndex(v => v.voucherNumber === currentNumStr);
       if (existingIdx !== -1) {
-        const copy = [...prev];
+        const copy = [...newList];
         copy[existingIdx] = voucher;
         return copy;
       }
-      return [voucher, ...prev];
+      return [voucher, ...newList];
     });
+
+    const listForMaxNum = savedVouchers.filter(v => v.voucherNumber !== loadedVoucherNumber);
+    if (!loadedVoucherNumber) {
+      listForMaxNum.push(voucher);
+    }
+    const maxNumInSaved = getNextUnusedNumber(listForMaxNum);
 
     // Update the last voucher number in localStorage
     const storedLast = parseInt(localStorage.getItem(LAST_VOUCHER_NUM_KEY) || '0', 10);
-    if (num > storedLast) {
-      localStorage.setItem(LAST_VOUCHER_NUM_KEY, String(num));
-    }
+    const finalStoredMax = Math.max(num, storedLast, maxNumInSaved - 1);
+    localStorage.setItem(LAST_VOUCHER_NUM_KEY, String(finalStoredMax));
+
+    // Reset loaded states
+    setLoadedVoucherNumber(null);
 
     // Prepare a fresh voucher for the next entry
-    const nextVNum = `V-${String(num + 1).padStart(4, '0')}`;
+    const nextVNum = `V-${String(finalStoredMax + 1).padStart(4, '0')}`;
     const todayStr = new Date().toISOString().split('T')[0];
 
     const freshVoucher: VoucherData = {
@@ -144,6 +176,7 @@ export function useVoucherStorage() {
 
   const loadVoucher = (targetVoucher: VoucherData) => {
     setVoucher(targetVoucher);
+    setLoadedVoucherNumber(targetVoucher.voucherNumber);
   };
 
   const deleteSavedVoucher = (voucherNum: string) => {
@@ -151,10 +184,8 @@ export function useVoucherStorage() {
   };
 
   const startNewVoucher = () => {
-    const lastNumStr = localStorage.getItem(LAST_VOUCHER_NUM_KEY) || '0';
-    const nextNum = parseInt(lastNumStr, 10) + 1;
-    const padNum = String(nextNum).padStart(4, '0');
-    const voucherNumber = `V-${padNum}`;
+    const nextNum = getNextUnusedNumber(savedVouchers);
+    const voucherNumber = `V-${String(nextNum).padStart(4, '0')}`;
     const todayStr = new Date().toISOString().split('T')[0];
 
     setVoucher({
@@ -170,6 +201,7 @@ export function useVoucherStorage() {
       inWordsBengali: '',
       inWordsEnglish: '',
     });
+    setLoadedVoucherNumber(null);
   };
 
   return {
