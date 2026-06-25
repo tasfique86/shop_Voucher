@@ -7,12 +7,14 @@ interface PdfGeneratorProps {
   elementId: string;
   voucherNumber: string;
   customerName?: string;
+  paperSize?: "a4" | "a5";
 }
 
 export default function PdfGenerator({
   elementId,
   voucherNumber,
   customerName,
+  paperSize = "a4",
 }: PdfGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -38,14 +40,14 @@ export default function PdfGenerator({
 
       const imgData = canvas.toDataURL("image/jpeg", 1.0);
 
-      // 3. Setup standard A4 size in jsPDF
+      // 3. Setup paper size in jsPDF
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: "a4",
+        format: paperSize,
       });
 
-      const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
+      const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
 
       const canvasWidth = canvas.width;

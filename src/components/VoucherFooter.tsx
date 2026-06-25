@@ -48,14 +48,14 @@ export default function VoucherFooter({
         </div>
       </div>
       {/* Remarks Section (if provided) */}
-      {customRemarks && (
+      {/* {customRemarks && (
         <div className="border border-black p-2.5 text-xs text-black leading-normal rounded-none bg-gray-50/50">
           <span className="font-bold uppercase tracking-wider block mb-0.5">
             শর্তাবলী :
           </span>
           {customRemarks}
         </div>
-      )}
+      )} */}
     </div>
   );
 }

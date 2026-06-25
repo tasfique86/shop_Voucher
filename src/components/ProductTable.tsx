@@ -136,11 +136,11 @@ export default function ProductTable({
             {/* Total Label inside Black Box */}
             <td className="bg-black text-white text-center border-r border-black py-1 text-xs md:text-sm font-extrabold flex items-center justify-center h-full min-h-[36px] uppercase">
               <span>মোট</span>
-              {showEnglishLabels && (
+              {/* {showEnglishLabels && (
                 <span className="text-[10px] font-normal italic ml-1">
                   (Total)
                 </span>
-              )}
+              )} */}
             </td>
 
             {/* Total Amount Value */}

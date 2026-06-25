@@ -91,6 +91,7 @@ export default function VoucherPage() {
   const [showEnglishLabels, setShowEnglishLabels] = useState(true);
   const [useBengaliDigits, setUseBengaliDigits] = useState(false);
   const [customRemarks, setCustomRemarks] = useState("");
+  const [paperSize, setPaperSize] = useState<"a4" | "a5">("a5");
 
   // Dynamic Presets State
   const [presets, setPresets] = useState<PresetItem[]>(() => {
@@ -835,36 +836,69 @@ export default function VoucherPage() {
                   প্রিন্ট ও ডিসপ্লে কনফিগারেশন (Preview Options)
                 </span>
 
-                <div className="grid grid-cols-2 gap-3 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                  {/* English Labels Toggle */}
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={showEnglishLabels}
-                      onChange={(e) => setShowEnglishLabels(e.target.checked)}
-                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 bg-white"
-                    />
-                    <span className="text-xs font-semibold text-slate-700">
-                      ইংরেজী লেবেল সহ
-                    </span>
-                  </label>
+                <div className="space-y-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                  {/* Paper Size Selector */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                      কাগজের সাইজ (Paper Size)
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPaperSize("a4")}
+                        className={`py-1.5 px-3 rounded text-xs font-bold transition-all border cursor-pointer ${
+                          paperSize === "a4"
+                            ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                        }`}
+                      >
+                        A4 (Standard)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPaperSize("a5")}
+                        className={`py-1.5 px-3 rounded text-xs font-bold transition-all border cursor-pointer ${
+                          paperSize === "a5"
+                            ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                        }`}
+                      >
+                        A5 (Half Size)
+                      </button>
+                    </div>
+                  </div>
 
-                  {/* Bengali digits toggle */}
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={useBengaliDigits}
-                      onChange={(e) => setUseBengaliDigits(e.target.checked)}
-                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 bg-white"
-                    />
-                    <span className="text-xs font-semibold text-slate-700">
-                      বাংলা সংখ্যা ফরম্যাট
-                    </span>
-                  </label>
+                  <div className="border-t border-slate-200/60 pt-2.5 grid grid-cols-2 gap-3">
+                    {/* English Labels Toggle */}
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={showEnglishLabels}
+                        onChange={(e) => setShowEnglishLabels(e.target.checked)}
+                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 bg-white"
+                      />
+                      <span className="text-xs font-semibold text-slate-700">
+                        ইংরেজী লেবেল সহ
+                      </span>
+                    </label>
+
+                    {/* Bengali digits toggle */}
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={useBengaliDigits}
+                        onChange={(e) => setUseBengaliDigits(e.target.checked)}
+                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 bg-white"
+                      />
+                      <span className="text-xs font-semibold text-slate-700">
+                        বাংলা সংখ্যা ফরম্যাট
+                      </span>
+                    </label>
+                  </div>
                 </div>
 
                 {/* Remarks Field */}
-                <div>
+                {/* <div>
                   <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">
                     শর্তাবলী
                   </label>
@@ -875,7 +909,7 @@ export default function VoucherPage() {
                     placeholder="পণ্য ক্রয়ের ৭ দিনের মধ্যে পরিবর্তনযোগ্য।"
                     className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg px-3 py-2 text-xs font-medium text-slate-800 transition-all"
                   />
-                </div>
+                </div> */}
               </div>
 
               {/* Action row: Save Finalized */}
@@ -893,10 +927,20 @@ export default function VoucherPage() {
 
         {/* Invoice Canvas Preview Column (Right Side - 7/12 columns) */}
         <div className="lg:col-span-7 flex flex-col items-center">
+          {/* Inject dynamic print styles for switching page sizes */}
+          <style>{`
+            @media print {
+              @page {
+                size: ${paperSize === "a5" ? "A5" : "A4"} portrait !important;
+                margin: ${paperSize === "a5" ? "10mm" : "15mm"} !important;
+              }
+            }
+          `}</style>
+
           {/* Real-time PDF & Print action buttons above the paper preview */}
           <div className="w-full flex flex-wrap justify-between items-center gap-3 mb-4 bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm no-print">
             <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-              লাইভ প্রিভিউ (A4 Print Preview)
+              লাইভ প্রিভিউ ({paperSize === "a5" ? "A5" : "A4"} Print Preview)
             </div>
 
             <div className="flex items-center gap-2">
@@ -905,6 +949,7 @@ export default function VoucherPage() {
                 elementId="printable-voucher-root"
                 voucherNumber={voucher.voucherNumber}
                 customerName={voucher.customerName}
+                paperSize={paperSize}
               />
 
               {/* Print Button */}
@@ -921,10 +966,14 @@ export default function VoucherPage() {
 
           {/* Interactive Digital Paper Preview Canvas Container */}
           <div className="w-full overflow-x-auto pb-4 no-print flex justify-center">
-            {/* Aspect ratio container simulating A4 paper look at standard resolution */}
+            {/* Aspect ratio container simulating A4/A5 paper look at standard resolution */}
             <div
               id="printable-voucher-root"
-              className="w-[794px] min-h-[1123px] bg-white text-black p-12 shadow-xl relative rounded-none border-2 border-black select-none flex flex-col justify-between"
+              className={`${
+                paperSize === "a5"
+                  ? "w-[559px] min-h-[794px] p-6"
+                  : "w-[794px] min-h-[1123px] p-12"
+              } bg-white text-black shadow-xl relative rounded-none border-2 border-black select-none flex flex-col justify-between`}
               style={{
                 fontFamily: "system-ui, -apple-system, sans-serif",
                 boxSizing: "border-box",
@@ -988,7 +1037,9 @@ export default function VoucherPage() {
             style={{ position: "absolute", top: 0, left: 0 }}
           >
             <div
-              className="w-full min-h-screen bg-white text-black p-8 flex flex-col justify-between"
+              className={`w-full min-h-screen bg-white text-black ${
+                paperSize === "a5" ? "p-6" : "p-8"
+              } flex flex-col justify-between`}
               style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}
             >
               <div className="flex-grow flex flex-col justify-between">
