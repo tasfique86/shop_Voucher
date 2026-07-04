@@ -29,7 +29,7 @@ export default function PdfGenerator({
 
     const element = document.getElementById(elementId);
     if (!element) {
-      alert("Error: Voucher preview element not found!");
+      console.error("Error: Voucher preview element not found!");
       return;
     }
 
@@ -91,16 +91,10 @@ export default function PdfGenerator({
       let finalCustomerName = customerName?.trim();
 
       if (!finalCustomerName) {
-        alert("Please enter customer name");
-        const enteredName = prompt("Please enter customer name:");
-        if (enteredName !== null && enteredName.trim() !== "") {
-          finalCustomerName = enteredName.trim();
-        } else {
-          // User denied or left blank -> use HH-MM-SS time format
-          const now = new Date();
-          const pad = (n: number) => String(n).padStart(2, "0");
-          finalCustomerName = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
-        }
+        // Automatically use time format instead of prompting
+        const now = new Date();
+        const pad = (n: number) => String(n).padStart(2, "0");
+        finalCustomerName = `Customer_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
       }
 
       // Format filename using (voucher no + customer name) and sanitize it
@@ -129,10 +123,7 @@ export default function PdfGenerator({
       }
     } catch (error) {
       console.error("Failed to generate PDF:", error);
-      const errMsg = error instanceof Error ? error.message : String(error);
-      alert(
-        `Failed to generate PDF: ${errMsg}. Please try again or use the browser print option.`,
-      );
+      // Removed alert to prevent UI hang
     } finally {
       setIsGenerating(false);
     }

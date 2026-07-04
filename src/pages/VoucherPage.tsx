@@ -21,6 +21,8 @@ import {
   Settings,
   X,
   FileSpreadsheet,
+  AlertCircle,
+  CheckCircle,
 } from "lucide-react";
 
 export interface PresetItem {
@@ -126,10 +128,30 @@ export default function VoucherPage() {
     };
   }>({});
 
-  // Search & History Filter
   const [searchQuery, setSearchQuery] = useState("");
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showPresetInfo, setShowPresetInfo] = useState(false);
+
+  // Custom Toast & Confirm State
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    message: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+  } | null>(null);
+
+  const showToast = (
+    message: string,
+    type: "success" | "error" = "success",
+  ) => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 3000);
+  };
 
   // Form Field Changers
   const handleCustomerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -161,8 +183,14 @@ export default function VoucherPage() {
     updateVoucher((prev) => {
       const updatedProducts = prev.products.map((p) => {
         if (p.id === id) {
-          const newVal =
-            field === "description" ? value : parseFloat(value) || 0;
+          let newVal = value;
+          if (field === "quantity" || field === "rate") {
+            newVal = String(value).replace(/[^0-9.]/g, "");
+            const parts = newVal.split(".");
+            if (parts.length > 2) {
+              newVal = parts[0] + "." + parts.slice(1).join("");
+            }
+          }
           return { ...p, [field]: newVal };
         }
         return p;
@@ -223,9 +251,10 @@ export default function VoucherPage() {
     const emptyRowIdx = voucher.products.findIndex(
       (p) => p.description.trim() === "" && p.quantity === 0 && p.rate === 0,
     );
-    const desc = showEnglishLabels
-      ? `${preset.nameBangali} / ${preset.nameEnglish}`
-      : preset.nameBangali;
+    const desc =
+      showEnglishLabels && preset.nameEnglish
+        ? `${preset.nameBangali} / ${preset.nameEnglish}`
+        : preset.nameBangali;
 
     if (emptyRowIdx !== -1) {
       const targetId = voucher.products[emptyRowIdx].id;
@@ -260,10 +289,7 @@ export default function VoucherPage() {
       setPresetFormError("পণ্যটির বাংলা নাম লিখুন (e.g. খাতা)");
       return;
     }
-    if (!newPresetEnglish.trim()) {
-      setPresetFormError("পণ্যটির ইংরেজী নাম লিখুন (e.g. Notebook)");
-      return;
-    }
+
     const rateVal = parseFloat(newPresetRate);
     if (isNaN(rateVal) || rateVal <= 0) {
       setPresetFormError("পণ্যটির সঠিক দর লিখুন (e.g. 60)");
@@ -289,13 +315,14 @@ export default function VoucherPage() {
 
   // Reset presets list to default presets list
   const resetPresetsToDefault = () => {
-    if (
-      window.confirm(
-        "আপনি কি সত্যিই পণ্য তালিকাটি ডিফল্ট তালিকায় রিসেট করতে চান?",
-      )
-    ) {
-      setPresets(DEFAULT_STATIONERY_PRESETS);
-    }
+    setConfirmDialog({
+      message: "আপনি কি সত্যিই পণ্য তালিকাটি ডিফল্ট তালিকায় রিসেট করতে চান?",
+      onConfirm: () => {
+        setPresets(DEFAULT_STATIONERY_PRESETS);
+        setConfirmDialog(null);
+      },
+      onCancel: () => setConfirmDialog(null),
+    });
   };
 
   // Run full validation
@@ -331,11 +358,11 @@ export default function VoucherPage() {
           quantity?: string;
           rate?: string;
         } = {};
-        if (p.quantity <= 0) {
+        if (Number(p.quantity) <= 0) {
           rowErr.quantity = "১ বা তার বেশি হতে হবে";
           isValid = false;
         }
-        if (p.rate <= 0) {
+        if (Number(p.rate) <= 0) {
           rowErr.rate = "০ এর বেশি হতে হবে";
           isValid = false;
         }
@@ -357,23 +384,26 @@ export default function VoucherPage() {
   const handleFinalize = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) {
-      alert(
+      showToast(
         "দয়া করে ভুলের স্থানগুলো সংশোধন করুন। (Please correct form validation errors before proceeding)",
+        "error",
       );
       return;
     }
 
     finalizeVoucherAndIncrement();
-    alert(
+    showToast(
       "ভাউচারটি সফলভাবে সংরক্ষণ করা হয়েছে এবং নতুন ভাউচার নম্বর বরাদ্দ করা হয়েছে! (Voucher finalized successfully!)",
+      "success",
     );
   };
 
   const handleBeforePdfGenerate = (): boolean => {
     const isValid = validateForm();
     if (!isValid) {
-      alert(
+      showToast(
         "দয়া করে ভুলের স্থানগুলো সংশোধন করুন। (Please correct form validation errors before generating PDF)",
+        "error",
       );
     }
     return isValid;
@@ -381,18 +411,25 @@ export default function VoucherPage() {
 
   const handlePdfSuccess = () => {
     finalizeVoucherAndIncrement();
-    alert(
+    showToast(
       "পিডিএফ সফলভাবে তৈরি হয়েছে এবং নতুন ভাউচার নম্বর বরাদ্দ করা হয়েছে! (PDF saved and new voucher loaded!)",
+      "success",
     );
   };
 
   // Keyboard friendly quick print
   const handlePrint = () => {
     if (!validateForm()) {
-      const confirmPrint = window.confirm(
-        "ভাউচারে কিছু তথ্য অসম্পূর্ণ রয়েছে। তবুও কি প্রিন্ট করতে চান? (Some fields are missing. Print anyway?)",
-      );
-      if (!confirmPrint) return;
+      setConfirmDialog({
+        message:
+          "ভাউচারে কিছু তথ্য অসম্পূর্ণ রয়েছে। তবুও কি প্রিন্ট করতে চান? (Some fields are missing. Print anyway?)",
+        onConfirm: () => {
+          setConfirmDialog(null);
+          window.print();
+        },
+        onCancel: () => setConfirmDialog(null),
+      });
+      return;
     }
     window.print();
   };
@@ -545,7 +582,7 @@ export default function VoucherPage() {
                       />
                       <input
                         type="text"
-                        placeholder="ইংরেজী নাম (e.g. Notebook)"
+                        placeholder="ইংরেজী নাম (Optional)"
                         value={newPresetEnglish}
                         onChange={(e) => setNewPresetEnglish(e.target.value)}
                         className="bg-white border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-sm"
@@ -784,8 +821,8 @@ export default function VoucherPage() {
                             পরিমাণ
                           </span>
                           <input
-                            type="number"
-                            min="1"
+                            type="text"
+                            inputMode="decimal"
                             value={row.quantity || ""}
                             onChange={(e) =>
                               handleRowChange(
@@ -806,9 +843,8 @@ export default function VoucherPage() {
                             দর
                           </span>
                           <input
-                            type="number"
-                            min="0.01"
-                            step="0.01"
+                            type="text"
+                            inputMode="decimal"
                             value={row.rate || ""}
                             onChange={(e) =>
                               handleRowChange(row.id, "rate", e.target.value)
@@ -1189,13 +1225,14 @@ export default function VoucherPage() {
                         {/* Delete Button */}
                         <button
                           onClick={() => {
-                            if (
-                              confirm(
-                                `আপনি কি সত্যিই ভাউচার ${item.voucherNumber} মুছে ফেলতে চান?`,
-                              )
-                            ) {
-                              deleteSavedVoucher(item.voucherNumber);
-                            }
+                            setConfirmDialog({
+                              message: `আপনি কি সত্যিই ভাউচার ${item.voucherNumber} মুছে ফেলতে চান?`,
+                              onConfirm: () => {
+                                deleteSavedVoucher(item.voucherNumber);
+                                setConfirmDialog(null);
+                              },
+                              onCancel: () => setConfirmDialog(null),
+                            });
                           }}
                           className="p-1.5 bg-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded transition border border-slate-200 cursor-pointer"
                         >
@@ -1232,6 +1269,57 @@ export default function VoucherPage() {
           </p>
         </div>
       </footer>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300">
+          <div
+            className={`px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 ${toast.type === "error" ? "bg-red-600 text-white" : "bg-green-600 text-white"}`}
+          >
+            {toast.type === "error" ? (
+              <AlertCircle className="w-5 h-5" />
+            ) : (
+              <CheckCircle className="w-5 h-5" />
+            )}
+            <p className="text-sm font-semibold">{toast.message}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm Dialog Overlay */}
+      {confirmDialog && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-150">
+            <div className="flex items-start gap-4">
+              <div className="bg-amber-100 text-amber-600 p-2 rounded-full shrink-0">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-2">
+                  নিশ্চিত করুন (Confirm)
+                </h3>
+                <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                  {confirmDialog.message}
+                </p>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={confirmDialog.onCancel}
+                className="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              >
+                না (Cancel)
+              </button>
+              <button
+                onClick={confirmDialog.onConfirm}
+                className="px-4 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-colors cursor-pointer"
+              >
+                হ্যাঁ (Confirm)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

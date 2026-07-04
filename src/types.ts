@@ -2,8 +2,8 @@ export interface ProductRow {
   id: string;
   serialNo: number;
   description: string;
-  quantity: number;
-  rate: number;
+  quantity: number | string;
+  rate: number | string;
   amount: number;
 }
 

@@ -20,6 +20,9 @@
     "directories": {
       "output": "dist-electron"
     },
+    "nsis": {
+      "deleteAppDataOnUninstall": true
+    },
     "win": {
       "target": [
         "nsis"

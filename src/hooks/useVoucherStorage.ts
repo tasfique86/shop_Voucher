@@ -87,13 +87,15 @@ export function useVoucherStorage() {
 
       // Calculate individual product row amounts and overall grand total
       const products = updated.products.map((p, idx) => {
-        const qty = Math.max(0, p.quantity);
-        const rate = Math.max(0, p.rate);
+        const parsedQty = typeof p.quantity === "string" ? parseFloat(p.quantity) || 0 : p.quantity;
+        const parsedRate = typeof p.rate === "string" ? parseFloat(p.rate) || 0 : p.rate;
+        const qty = Math.max(0, parsedQty);
+        const rate = Math.max(0, parsedRate);
         return {
           ...p,
           serialNo: idx + 1,
-          quantity: qty,
-          rate: rate,
+          quantity: p.quantity,
+          rate: p.rate,
           amount: parseFloat((qty * rate).toFixed(2)),
         };
       });

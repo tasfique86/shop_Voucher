@@ -33,11 +33,12 @@ export default function ProductTable({
     });
   }
 
-  const formatNumberValue = (val: number, isAmount = false) => {
-    if (val === 0 && !isAmount) return "";
-    if (val === 0 && isAmount) return "";
+  const formatNumberValue = (val: number | string, isAmount = false) => {
+    const numericVal = typeof val === "string" ? parseFloat(val) || 0 : val;
+    if (numericVal === 0 && !isAmount) return "";
+    if (numericVal === 0 && isAmount) return "";
 
-    const formatted = val.toFixed(2);
+    const formatted = numericVal.toFixed(2);
     return useBengaliDigits ? toBengaliNumber(formatted) : formatted;
   };
 
