@@ -25,7 +25,17 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-function DebouncedInput({ value, onChange, placeholder, className, type = "text", inputMode, min, step, title }: any) {
+function DebouncedInput({
+  value,
+  onChange,
+  placeholder,
+  className,
+  type = "text",
+  inputMode,
+  min,
+  step,
+  title,
+}: any) {
   const [localValue, setLocalValue] = useState(value);
   const timeoutRef = useRef<any>(null);
 
@@ -36,7 +46,7 @@ function DebouncedInput({ value, onChange, placeholder, className, type = "text"
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setLocalValue(val);
-    
+
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
       onChange(val);
@@ -1059,7 +1069,7 @@ export default function VoucherPage() {
                 paperSize === "a5"
                   ? "w-[559px] min-h-[794px] p-6"
                   : "w-[794px] min-h-[1123px] p-12"
-              } bg-white text-black shadow-xl relative rounded-none border-2 border-black select-none flex flex-col justify-between`}
+              } bg-gradient-to-br from-blue-50/60 via-white to-indigo-50/60 text-indigo-950 shadow-xl relative rounded-none border-2 border-indigo-900 select-none flex flex-col justify-between`}
               style={{
                 fontFamily: "system-ui, -apple-system, sans-serif",
                 boxSizing: "border-box",
@@ -1067,10 +1077,10 @@ export default function VoucherPage() {
             >
               {/* Outer watermark background style to match fancy voucher pads */}
               <div
-                className="absolute inset-0 pointer-events-none opacity-[0.02] border border-black m-2"
+                className="absolute inset-0 pointer-events-none opacity-[0.03] border border-indigo-900 m-2"
                 style={{
                   backgroundImage:
-                    "radial-gradient(circle, #000000 1px, transparent 1px)",
+                    "radial-gradient(circle, #312e81 1px, transparent 1px)",
                   backgroundSize: "24px 24px",
                 }}
               />

@@ -15,10 +15,10 @@ export default function VoucherFooter({
   return (
     <div className="space-y-6 mt-2" id="voucher-footer">
       {/* Signatures & Greetings Row */}
-      <div className="pt-12 flex justify-between items-end text-center text-xs md:text-sm text-black">
+      <div className="pt-12 flex justify-between items-end text-center text-xs md:text-sm text-indigo-950">
         {/* Buyer Signature */}
         <div className="w-[30%]">
-          <div className="border-t border-black pt-1.5 font-bold text-black tracking-wide">
+          <div className="border-t border-indigo-900 pt-1.5 font-bold text-indigo-950 tracking-wide">
             ক্রেতার স্বাক্ষর
           </div>
           {showEnglishLabels && (
@@ -30,14 +30,14 @@ export default function VoucherFooter({
 
         {/* Center Thank You greeting */}
         <div className="w-[35%] pb-1">
-          <div className="font-extrabold text-black text-xs md:text-sm tracking-wide px-4 py-1.5 inline-block">
+          <div className="font-extrabold text-indigo-950 text-xs md:text-sm tracking-wide px-4 py-1.5 inline-block">
             ধন্যবাদ আবার আসবেন।
           </div>
         </div>
 
         {/* Seller Signature */}
         <div className="w-[30%]">
-          <div className="border-t border-black pt-1.5 font-bold text-black tracking-wide">
+          <div className="border-t border-indigo-900 pt-1.5 font-bold text-indigo-950 tracking-wide">
             বিক্রেতার স্বাক্ষর
           </div>
           {showEnglishLabels && (
@@ -49,7 +49,7 @@ export default function VoucherFooter({
       </div>
       {/* Remarks Section (if provided) */}
       {/* {customRemarks && (
-        <div className="border border-black p-2.5 text-xs text-black leading-normal rounded-none bg-gray-50/50">
+        <div className="border border-indigo-900 p-2.5 text-xs text-indigo-950 leading-normal rounded-none bg-indigo-50/50">
           <span className="font-bold uppercase tracking-wider block mb-0.5">
             শর্তাবলী :
           </span>

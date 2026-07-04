@@ -48,12 +48,12 @@ export default function ProductTable({
 
   return (
     <div
-      className="w-full border-2 border-black rounded-none overflow-hidden mb-4"
+      className="w-full border-2 border-indigo-900 rounded-none overflow-hidden mb-4"
       id="product-table-print"
     >
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="bg-black text-white text-xs md:text-sm font-bold border-b-2 border-black text-center">
+          <tr className="bg-indigo-900 text-white text-xs md:text-sm font-bold border-b-2 border-indigo-900 text-center">
             {/* Serial Number */}
             <th className="py-2 px-1 border-r border-white w-[10%] shrink-0">
               <div>ক্র: নং</div>
@@ -86,30 +86,30 @@ export default function ProductTable({
             return (
               <tr
                 key={row.id}
-                className="border-b border-black hover:bg-gray-50/50 transition-colors text-xs md:text-sm h-8"
+                className="border-b border-indigo-900 hover:bg-indigo-50/50 transition-colors text-xs md:text-sm h-8"
               >
                 {/* Serial No */}
-                <td className="text-center font-bold border-r border-black py-1 text-black">
+                <td className="text-center font-bold border-r border-indigo-900 py-1 text-indigo-950">
                   {formatSerial(index + 1)}
                 </td>
 
                 {/* Description */}
-                <td className="px-3 border-r border-black font-semibold text-black truncate max-w-0">
+                <td className="px-3 border-r border-indigo-900 font-semibold text-indigo-950 truncate max-w-0">
                   {row.description}
                 </td>
 
                 {/* Quantity */}
-                <td className="text-center border-r border-black font-mono text-black font-bold py-1">
+                <td className="text-center border-r border-indigo-900 font-mono text-indigo-950 font-bold py-1">
                   {isEmpty ? "" : formatNumberValue(row.quantity)}
                 </td>
 
                 {/* Rate */}
-                <td className="text-center border-r border-black font-mono text-black font-bold py-1">
+                <td className="text-center border-r border-indigo-900 font-mono text-indigo-950 font-bold py-1">
                   {isEmpty ? "" : formatNumberValue(row.rate)}
                 </td>
 
                 {/* Amount */}
-                <td className="text-right px-3 font-mono font-bold text-black py-1">
+                <td className="text-right px-3 font-mono font-bold text-indigo-950 py-1">
                   {isEmpty ? "" : formatNumberValue(row.amount, true)}
                 </td>
               </tr>
@@ -117,17 +117,17 @@ export default function ProductTable({
           })}
 
           {/* Grand Total Row */}
-          <tr className="border-t-2 border-black bg-gray-50/80 h-9 font-bold">
+          <tr className="border-t-2 border-indigo-900 bg-indigo-50/80 h-9 font-bold">
             <td
               colSpan={3}
-              className="border-r border-black py-1 px-3 text-left"
+              className="border-r border-indigo-900 py-1 px-3 text-left"
             >
-              <div className="flex flex-col justify-center text-xs md:text-sm text-black">
+              <div className="flex flex-col justify-center text-xs md:text-sm text-indigo-950">
                 <div className="flex items-center gap-1">
-                  <span className="font-extrabold text-black whitespace-nowrap">
+                  <span className="font-extrabold text-indigo-950 whitespace-nowrap">
                     কথায় :
                   </span>
-                  <span className="font-bold text-black">
+                  <span className="font-bold text-indigo-950">
                     {numberToBengaliWords(totalAmount)} মাত্র।
                   </span>
                 </div>
@@ -135,7 +135,7 @@ export default function ProductTable({
             </td>
 
             {/* Total Label inside Black Box */}
-            <td className="bg-black text-white text-center border-r border-black py-1 text-xs md:text-sm font-extrabold flex items-center justify-center h-full min-h-[36px] uppercase">
+            <td className="bg-indigo-900 text-white text-center border-r border-indigo-900 py-1 text-xs md:text-sm font-extrabold flex items-center justify-center h-full min-h-[36px] uppercase">
               <span>মোট</span>
               {/* {showEnglishLabels && (
                 <span className="text-[10px] font-normal italic ml-1">
@@ -145,7 +145,7 @@ export default function ProductTable({
             </td>
 
             {/* Total Amount Value */}
-            <td className="text-right px-3 font-mono font-extrabold text-sm md:text-base text-black bg-gray-100/90">
+            <td className="text-right px-3 font-mono font-extrabold text-sm md:text-base text-indigo-950 bg-indigo-100/90">
               {useBengaliDigits
                 ? toBengaliNumber(totalAmount.toFixed(2))
                 : totalAmount.toFixed(2)}
