@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useVoucherStorage } from "../hooks/useVoucherStorage";
 import { ProductRow, VoucherData } from "../types";
 import VoucherHeader from "../components/VoucherHeader";
@@ -24,6 +24,45 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
+
+function DebouncedInput({ value, onChange, placeholder, className, type = "text", inputMode, min, step, title }: any) {
+  const [localValue, setLocalValue] = useState(value);
+  const timeoutRef = useRef<any>(null);
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setLocalValue(val);
+    
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      onChange(val);
+    }, 200);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    onChange(e.target.value);
+  };
+
+  return (
+    <input
+      type={type}
+      inputMode={inputMode}
+      value={localValue}
+      onChange={handleChange}
+      onBlur={handleBlur}
+      placeholder={placeholder}
+      className={className}
+      min={min}
+      step={step}
+      title={title}
+    />
+  );
+}
 
 export interface PresetItem {
   nameBangali: string;
@@ -787,15 +826,11 @@ export default function VoucherPage() {
                         </span>
 
                         <div className="flex-grow">
-                          <input
+                          <DebouncedInput
                             type="text"
                             value={row.description}
-                            onChange={(e) =>
-                              handleRowChange(
-                                row.id,
-                                "description",
-                                e.target.value,
-                              )
+                            onChange={(val: string) =>
+                              handleRowChange(row.id, "description", val)
                             }
                             placeholder="মালের বিবরণ (Item Details)"
                             className="w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-1 rounded-md px-2.5 py-1.5 text-xs text-slate-800 font-semibold shadow-sm"
@@ -820,16 +855,12 @@ export default function VoucherPage() {
                           <span className="absolute left-2 text-[9px] font-bold text-slate-400 uppercase tracking-wider select-none">
                             পরিমাণ
                           </span>
-                          <input
+                          <DebouncedInput
                             type="text"
                             inputMode="decimal"
                             value={row.quantity || ""}
-                            onChange={(e) =>
-                              handleRowChange(
-                                row.id,
-                                "quantity",
-                                e.target.value,
-                              )
+                            onChange={(val: string) =>
+                              handleRowChange(row.id, "quantity", val)
                             }
                             placeholder="Qty"
                             className={`w-full bg-white border ${errors.productRows?.[row.id]?.quantity ? "border-red-500" : "border-slate-200"} focus:border-indigo-500 focus:ring-1 rounded-md pl-11 pr-1.5 py-1.5 text-xs text-center font-mono text-slate-800 shadow-sm`}
@@ -842,12 +873,12 @@ export default function VoucherPage() {
                           <span className="absolute left-2 text-[9px] font-bold text-slate-400 uppercase tracking-wider select-none">
                             দর
                           </span>
-                          <input
+                          <DebouncedInput
                             type="text"
                             inputMode="decimal"
                             value={row.rate || ""}
-                            onChange={(e) =>
-                              handleRowChange(row.id, "rate", e.target.value)
+                            onChange={(val: string) =>
+                              handleRowChange(row.id, "rate", val)
                             }
                             placeholder="Rate"
                             className={`w-full bg-white border ${errors.productRows?.[row.id]?.rate ? "border-red-500" : "border-slate-200"} focus:border-indigo-500 focus:ring-1 rounded-md pl-7 pr-1.5 py-1.5 text-xs text-center font-mono text-slate-800 shadow-sm`}

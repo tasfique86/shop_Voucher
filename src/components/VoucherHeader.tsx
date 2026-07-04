@@ -80,19 +80,19 @@ export default function VoucherHeader({
           <span className="font-mono border-b border-black px-2 pb-0.5 font-bold text-black text-base tracking-wider min-w-[80px]">
             {voucherNumber}
           </span>
-          {showEnglishLabels && (
+          {/* {showEnglishLabels && (
             <span className="text-[10px] text-gray-500 italic">(No.)</span>
-          )}
+          )} */}
         </div>
 
         {/* Date Boxes matching the image */}
         <div className="flex items-center gap-2">
           <span className="font-extrabold text-black text-base">তারিখ :</span>
-          {showEnglishLabels && (
+          {/* {showEnglishLabels && (
             <span className="text-[10px] text-gray-500 italic mr-1">
               (Date)
             </span>
-          )}
+          )} */}
 
           <div className="flex items-center">
             {/* Day Boxes */}

@@ -10,8 +10,8 @@ const INITIAL_PRODUCTS: ProductRow[] = [
 ];
 
 const getNextUnusedNumber = (list: VoucherData[]) => {
-  const lastNumStr = localStorage.getItem(LAST_VOUCHER_NUM_KEY) || '0';
-  let maxNum = parseInt(lastNumStr, 10);
+  const lastNumStr = localStorage.getItem(LAST_VOUCHER_NUM_KEY) || "2600";
+  let maxNum = Math.max(parseInt(lastNumStr, 10), 2600);
   list.forEach(v => {
     const match = v.voucherNumber.match(/V-(\d+)/);
     if (match) {
@@ -40,8 +40,9 @@ export function useVoucherStorage() {
     }
 
     // 2. No draft, create initial blank voucher with a fresh number
-    const lastNumStr = localStorage.getItem(LAST_VOUCHER_NUM_KEY) || '0';
-    const nextNum = parseInt(lastNumStr, 10) + 1;
+    const lastNumStr = localStorage.getItem(LAST_VOUCHER_NUM_KEY) || "2600";
+    let nextNum = parseInt(lastNumStr, 10) + 1;
+    if (nextNum < 2601) nextNum = 2601;
     const padNum = String(nextNum).padStart(4, '0');
     const voucherNumber = `V-${padNum}`;
 
@@ -148,8 +149,8 @@ export function useVoucherStorage() {
     const maxNumInSaved = getNextUnusedNumber(listForMaxNum);
 
     // Update the last voucher number in localStorage
-    const storedLast = parseInt(localStorage.getItem(LAST_VOUCHER_NUM_KEY) || '0', 10);
-    const finalStoredMax = Math.max(num, storedLast, maxNumInSaved - 1);
+    const storedLast = parseInt(localStorage.getItem(LAST_VOUCHER_NUM_KEY) || "2600", 10);
+    const finalStoredMax = Math.max(num, storedLast, maxNumInSaved - 1, 2600);
     localStorage.setItem(LAST_VOUCHER_NUM_KEY, String(finalStoredMax));
 
     // Reset loaded states
